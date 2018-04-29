@@ -1,0 +1,16 @@
+﻿<Properties StartupItem="Assembly-CSharp.csproj">
+  <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" PreferredExecutionTarget="Unity.Instance.Unity Editor" />
+  <MonoDevelop.Ide.Workbench ActiveDocument="Assets\wodi\GameClient.cs">
+    <Files>
+      <File FileName="Assets\wodi\GameClient.cs" Line="43" Column="6" />
+      <File FileName="Assets\wodi\PUNConnect.cs" Line="1" Column="1" />
+    </Files>
+  </MonoDevelop.Ide.Workbench>
+  <MonoDevelop.Ide.DebuggingService.Breakpoints>
+    <BreakpointStore>
+      <Breakpoint file="E:\u3d\kkk2017\Assets\wodi\PUNConnect.cs" line="59" column="1" />
+      <Breakpoint file="E:\u3d\kkk2017\Assets\wodi\PUNConnect.cs" line="64" column="1" />
+    </BreakpointStore>
+  </MonoDevelop.Ide.DebuggingService.Breakpoints>
+  <MonoDevelop.Ide.DebuggingService.PinnedWatches />
+</Properties>
