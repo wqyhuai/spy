@@ -60,7 +60,47 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     public static GameState gameState = GameState.GameInit;
 
     //private int rolesAllocation = 0;
+    public static Vector2 NativeResolution = new Vector2(640, 360);
+    private static float _guiScaleFactor = -1.0f;
+    private static Vector3 _offset = Vector3.zero;
+    static List<Matrix4x4> stack = new List<Matrix4x4>();
+    static bool _didResizeUI = false;
+    public void BeginUIResizing()
+    {
+        Vector2 nativeSize = NativeResolution;
+        _didResizeUI = true;
 
+        stack.Add(GUI.matrix);
+        Matrix4x4 m = new Matrix4x4();
+        var w = (float)Screen.width;
+        var h = (float)Screen.height;
+        var aspect = w / h;
+        var offset = Vector3.zero;
+        if(aspect < (nativeSize.x/nativeSize.y))
+        {
+            _guiScaleFactor = (Screen.width / nativeSize.x);
+            offset.y += (Screen.height - (nativeSize.y * _guiScaleFactor)) * 0.5f;
+            //Debug.Log("11+++++++++++offset:" + offset);
+        }
+        else
+        {
+            _guiScaleFactor = (Screen.height / nativeSize.y);
+            offset.x += (Screen.width - (nativeSize.x * _guiScaleFactor)) * 0.5f;
+            //Debug.Log("22+++++++++++offset:" + offset);
+        }
+
+        m.SetTRS(offset, Quaternion.identity, Vector3.one * _guiScaleFactor);
+        _offset = offset/_guiScaleFactor;
+        //Debug.Log("33+++++++++++_offset:" + _offset + ", _guiScaleFactor:" + _guiScaleFactor);
+        GUI.matrix *= m;
+    }
+
+    public void EndUIResizing()
+    {
+        GUI.matrix = stack[stack.Count - 1];
+        stack.RemoveAt(stack.Count - 1);
+        _didResizeUI = false;
+    }
 
     // Use this for initialization
     void Start () {
@@ -83,6 +123,116 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
             diskObject.transform.Rotate(Vector3.up * Time.deltaTime * 50, Space.World);
         }
     }
+    private void OnGUI()
+    {
+        BeginUIResizing();
+        //Debug.Log("OnGUI+++++++++width:" + Screen.width + ", height:" + Screen.height
+        //    + ", offset x:" + _offset.x + ", y:" + _offset.y);
+
+        //_offset x负数向左靠，正数向右靠；y负数向上靠，正数向下靠
+        int diffY = 0;
+        string strHost = isHost ? "房主" : "房客";
+        string strIdentify = "身份";
+        if (selfRole != null)
+        {
+            strIdentify = selfRole.isSpy ? "卧底" : "平民";
+        }
+
+        if (gameState == GameState.JoinedRoom)
+        {
+            GUI.Label(new Rect(0 - _offset.x + 20, diffY - _offset.y, 50, 20), PhotonNetwork.room.Name);
+        }
+        GUI.Label(new Rect(0 - _offset.x + 70, diffY - _offset.y, 50, 20), strHost);
+        if (gameState == GameState.GameStart || gameState == GameState.SpyWin || gameState == GameState.SpyLose)
+        {
+            GUI.Label(new Rect(0 - _offset.x + 140, diffY - _offset.y, 50, 20), strIdentify);
+        }
+        GUI.Label(new Rect(0 - _offset.x + 210, diffY - _offset.y, 50, 20), PhotonNetwork.connectionStateDetailed.ToString());
+        GUI.Label(new Rect(0 - _offset.x + 280, diffY - _offset.y, 50, 20), "score:" + gameScore);
+        GUI.Label(new Rect(0 - _offset.x + 350, diffY - _offset.y, 100, 20), "剩余时间：" + timeLeft);
+
+
+        if (gameState == GameState.SpyWin || gameState == GameState.SpyLose)
+        {
+            return;
+        }
+
+        if (!PhotonNetwork.inRoom && PhotonNetwork.connectionStateDetailed.ToString() == "JoinedLobby")
+        {
+            if (GUI.Button(new Rect(NativeResolution.x/2 - 50 - _offset.x, 30 + diffY - _offset.y, 70, 30), "加入房间"))
+            {
+                setName();
+                if (PhotonNetwork.connected)
+                {
+                    //Debug.Log("++++++++++++PhotonNetwork.connectionStateDetailed.ToString():"
+                    //     + PhotonNetwork.connectionStateDetailed.ToString());
+                    //PhotonNetwork.CreateRoom("极客学院", new RoomOptions { MaxPlayers = 16 }, null);
+                    //必须用JoinOrCreateRoom才能同步PhotonView物体
+                    PhotonNetwork.JoinOrCreateRoom("room1", new RoomOptions { MaxPlayers = 16 }, null);
+                }
+            }
+        }
+
+
+        if (PhotonNetwork.inRoom)
+        {
+            if (GUI.Button(new Rect(NativeResolution.x/2 - 50 - _offset.x, 30 + diffY - _offset.y, 70, 30), "退出房间"))
+            {
+                gameState = GameState.JoinedLobby;
+                roleList.Clear();
+                PhotonNetwork.LeaveRoom();
+            }
+        }
+
+        //PhotonNetwork.inRoom与gameState == GameState.JoinedRoom是同时出现的，为保险起见都判断
+        if (PhotonNetwork.connected && isHost && PhotonNetwork.inRoom && gameState == GameState.JoinedRoom)
+        {
+            if (GUI.Button(new Rect(NativeResolution.x/2 + 50 - _offset.x, 30 + diffY - _offset.y, 70, 30), "开始游戏"))
+            {
+                gameInit();
+                StartCoroutine(gameStart());
+            }
+        }
+
+
+        /*
+        if (GUI.Button(new Rect(Screen.width / 2 + 250, 30 + diffY - _offset.y, 50, 30), "测试"))
+        {
+            //s_endScene.SetActive(true);
+            Debug.Log("test begin+++++++++++++++");
+        }
+        */
+        //显示玩家列表
+        if (PhotonNetwork.inRoom)
+        {
+            for (int i = 0; i < roleList.Count; i++)
+            {
+                Role r = roleList[i];
+                //Debug.Log("++++++++++i:" + i + ", name:" + r.name);
+                int y = 70 + 40 * i;
+                if (r.id == selfRole.id)
+                {
+                    GUI.Label(new Rect(20 - _offset.x, y, 70, 20), r.name, customSelfStyle);
+                }
+                else
+                {
+                    //根据状态显示不同的button颜色
+                    if (GUI.Button(new Rect(20 - _offset.x, y, 70, 20), r.name, customStyle))
+                    {
+                        if (gameState == GameState.GameStart)
+                        {
+                            pointSpy(selfRole, r);
+                            int[] ids = new int[] { selfRole.id, r.id };
+                            PhotonNetwork.RaiseEvent((byte)ProtocolCode.All_word, ids, true, null);
+                        }
+                    }
+                }
+            }
+        }
+
+        EndUIResizing();
+    }
+
 
     void TimeSchedule()
     {
@@ -241,115 +391,6 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     */
     // Update is called once per frame
 
-    private void OnGUI()
-    {
-
-        int diffY = 0;
-        string strHost = isHost ? "房主" : "房客";
-        string strIdentify = "身份";
-        if (selfRole != null)
-        {
-            strIdentify = selfRole.isSpy ? "卧底" : "平民";
-        }
-
-        if (gameState == GameState.JoinedRoom)
-        {
-            GUI.Label(new Rect(Screen.width / 2 - 270, 20 + diffY, 150, 20), PhotonNetwork.room.Name);
-        }
-        GUI.Label(new Rect(Screen.width / 2 - 200, 20 + diffY, 150, 20), strHost);
-        if (gameState == GameState.GameStart || gameState == GameState.SpyWin || gameState == GameState.SpyLose)
-        {
-            GUI.Label(new Rect(Screen.width / 2 - 150, 20 + diffY, 150, 20), strIdentify);
-        }
-        GUI.Label(new Rect(Screen.width / 2 - 75, 20 + diffY, 150, 20), PhotonNetwork.connectionStateDetailed.ToString());
-        GUI.Label(new Rect(Screen.width / 2 + 100, 20 + diffY, 150, 20), "score:" + gameScore);
-        GUI.Label(new Rect(Screen.width / 2 + 250, 20 + diffY, 150, 20), "剩余时间：" + timeLeft);
-
-
-        if (gameState == GameState.SpyWin || gameState == GameState.SpyLose)
-        {
-            return;
-        }
-
-        if (!PhotonNetwork.inRoom && PhotonNetwork.connectionStateDetailed.ToString()  == "JoinedLobby")
-        {
-            if (GUI.Button(new Rect(Screen.width / 2 - 50, 50 + diffY, 100, 30), "加入房间"))
-            {
-                setName();
-                if (PhotonNetwork.connected)
-                {
-                    //Debug.Log("++++++++++++PhotonNetwork.connectionStateDetailed.ToString():"
-                   //     + PhotonNetwork.connectionStateDetailed.ToString());
-                    //PhotonNetwork.CreateRoom("极客学院", new RoomOptions { MaxPlayers = 16 }, null);
-                    //必须用JoinOrCreateRoom才能同步PhotonView物体
-                    PhotonNetwork.JoinOrCreateRoom("room1", new RoomOptions { MaxPlayers = 16 }, null);
-                }
-            }
-        }
- 
-
-        if (PhotonNetwork.inRoom)
-        {
-            if (GUI.Button(new Rect(Screen.width / 2 - 50, 50 + diffY, 100, 30), "退出房间"))
-            {
-                gameState = GameState.JoinedLobby;
-                roleList.Clear();
-                PhotonNetwork.LeaveRoom();
-            }
-        }
-
-        //PhotonNetwork.inRoom与gameState == GameState.JoinedRoom是同时出现的，为保险起见都判断
-        if (PhotonNetwork.connected && isHost && PhotonNetwork.inRoom && gameState == GameState.JoinedRoom)
-        {
-            if (GUI.Button(new Rect(Screen.width / 2 + 100, 50 + diffY, 100, 30), "开始游戏"))
-            {
-                gameInit();
-                StartCoroutine(gameStart());
-            }
-        }
-
-
-        /*
-        if (GUI.Button(new Rect(Screen.width / 2 + 250, 50 + diffY, 50, 30), "测试"))
-        {
-            //s_endScene.SetActive(true);
-            Debug.Log("test begin+++++++++++++++");
-        }
-        */
-        //显示玩家列表
-        if (PhotonNetwork.inRoom)
-        {
-            for (int i = 0; i < roleList.Count; i++)
-            {
-                Role r = roleList[i];
-                //Debug.Log("++++++++++i:" + i + ", name:" + r.name);
-                int y = 50 * (i + 1);
-                if (r.id == selfRole.id)
-                {
-                    GUI.Label(new Rect(Screen.width / 2 - 250, y, 70, 30), r.name, customSelfStyle);
-                }
-                else
-                {
-                    //根据状态显示不同的button颜色
-                    if (GUI.Button(new Rect(Screen.width / 2 - 250, y, 70, 30), r.name, customStyle))
-                    {
-                        if (gameState == GameState.GameStart)
-                        {
-                            pointSpy(selfRole, r);
-                            /*
-                            GameObject obj = GameObject.Find(r.objectName);
-                            GameObject word = obj.transform.Find("wordCanvas").gameObject;
-                            word.SetActive(true);
-                            word.transform.Find("Button").transform.Find("Text").GetComponent<Text>().text = r.name + "是卧底";
-                            */
-                            int[] ids = new int[] { selfRole.id, r.id };
-                            PhotonNetwork.RaiseEvent((byte)ProtocolCode.All_word, ids, true, null);
-                        }
-                    }
-                }
-            }
-        }
-    }
 
     void loadName()
     {
