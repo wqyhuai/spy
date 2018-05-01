@@ -333,12 +333,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\2D_ColorsBall\Script\Ball.cs" />
-    <Compile Include="Assets\2D_ColorsBall\Script\cEnemy.cs" />
-    <Compile Include="Assets\2D_ColorsBall\Script\ColorFall.cs" />
-    <Compile Include="Assets\2D_ColorsBall\Script\GameManager.cs" />
-    <Compile Include="Assets\2D_ColorsBall\Script\JustRotate.cs" />
-    <Compile Include="Assets\2D_ColorsBall\Script\PlayerManager.cs" />
     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_CreateWindowShareLink.cs" />
     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_DestroyWindow.cs" />
     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_GraphicsManager.cs" />
