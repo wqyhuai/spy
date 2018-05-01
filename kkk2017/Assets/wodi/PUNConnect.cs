@@ -1134,11 +1134,13 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     public void OnPhotonCreateRoomFailed(object[] codeAndMsg)
     {
         Debug.Log("OnPhotonCreateRoomFailed+++++++++++++++++++++++++++++");
+        showTips("创建房间失败", 1f);
     }
 
     public void OnPhotonJoinRoomFailed(object[] codeAndMsg)
     {
         Debug.Log("OnPhotonJoinRoomFailed+++++++++++++++++++++++++++++");
+        showTips("加入房间失败", 1f);
     }
 
     public void OnCreatedRoom()
