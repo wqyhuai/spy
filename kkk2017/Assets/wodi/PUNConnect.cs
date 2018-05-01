@@ -6,8 +6,8 @@ using ExitGames.Client.Photon;
 using System.Text;
 using System;
 using UnityEngine.UI;
-using UnityEngine.SceneManagement;
-using System.Linq;
+
+
 //using System;
 
 public class Role
@@ -50,6 +50,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     private int selfID = -1;
     public static bool isHost = false;
     public static Role selfRole = new Role();
+    private PhotonPlayer selfPlayer;
     public static List<Role> roleList = new List<Role>();
     public static string gameResultReason = "";
 
@@ -110,6 +111,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         PhotonNetwork.OnEventCall += this.OnEvent;
 
         PhotonPeer.RegisterType(typeof(Role), (byte)'R', SerializeRole, DeSerializeRole);
+        PhotonNetwork.autoCleanUpPlayerObjects = true;
 
         loadName();
 
@@ -159,7 +161,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
         if (!PhotonNetwork.inRoom && PhotonNetwork.connectionStateDetailed.ToString() == "JoinedLobby")
         {
-            if (GUI.Button(new Rect(NativeResolution.x/2 - 50 - _offset.x, 30 + diffY - _offset.y, 70, 30), "加入房间"))
+            Rect rect = new Rect(NativeResolution.x / 2 - 50 - _offset.x, 30 + diffY - _offset.y, 70, 30);
+            if (GUI.Button(rect, "加入房间"))
             {
                 setName();
                 if (PhotonNetwork.connected)
@@ -176,7 +179,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
         if (PhotonNetwork.inRoom)
         {
-            if (GUI.Button(new Rect(NativeResolution.x/2 - 50 - _offset.x, 30 + diffY - _offset.y, 70, 30), "退出房间"))
+            Rect rect = new Rect(NativeResolution.x / 2 - 50 - _offset.x, 30 + diffY - _offset.y, 70, 30);
+            if (GUI.Button(rect, "退出房间"))
             {
                 gameState = GameState.JoinedLobby;
                 roleList.Clear();
@@ -187,7 +191,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         //PhotonNetwork.inRoom与gameState == GameState.JoinedRoom是同时出现的，为保险起见都判断
         if (PhotonNetwork.connected && isHost && PhotonNetwork.inRoom && gameState == GameState.JoinedRoom)
         {
-            if (GUI.Button(new Rect(NativeResolution.x/2 + 50 - _offset.x, 30 + diffY - _offset.y, 70, 30), "开始游戏"))
+            Rect rect = new Rect(NativeResolution.x / 2 + 50 - _offset.x, 30 + diffY - _offset.y, 70, 30);
+            if (GUI.Button(rect, "开始游戏"))
             {
                 gameInit();
                 StartCoroutine(gameStart());
@@ -196,10 +201,11 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
 
         /*
-        if (GUI.Button(new Rect(Screen.width / 2 + 250, 30 + diffY - _offset.y, 50, 30), "测试"))
+        if (GUI.Button(new Rect(NativeResolution.x / 2 + 150 - _offset.x, 30 + diffY - _offset.y, 50, 30), "测试"))
         {
-            //s_endScene.SetActive(true);
-            Debug.Log("test begin+++++++++++++++");
+            GameObject disk = getObjectByName("disk");
+            Debug.Log("test begin+++++++++++++++disk:" + disk.name);
+
         }
         */
         //显示玩家列表
@@ -277,6 +283,20 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         return null;
     }
 
+    public GameObject getObjectByName(string name)
+    {
+        GameObject[] pAllObjects = (GameObject[])Resources.FindObjectsOfTypeAll(typeof(GameObject));
+
+        foreach (GameObject pObject in pAllObjects)
+        {
+            if (pObject.name == name)
+            {
+                return pObject;
+            }
+        }
+
+        return null;
+    }
  
     static byte[] SerializeRole(object role)
     {
@@ -421,7 +441,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         return (result == 0) ? 0 : 1;
     }
 
-    private void showTips(string tips, float time)
+    public void showTips(string tips, float time)
     {
         GameObject text = GameObject.Find("tipsCanvas/Text");
         if (text == null)
@@ -453,7 +473,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
         selfRole.id = PhotonNetwork.player.ID;
         selfRole.name = PhotonNetwork.playerName;
-        selfRole.isDeath = true;
+        selfRole.isDeath = false;
         Debug.Log("自己加入房间createSelfRole+++++++++++++++++++++++++++++name:" + PhotonNetwork.room.Name
             + ", playerCount:" + PhotonNetwork.room.PlayerCount + ", selfID:" + selfID
             + ", roomString:" + PhotonNetwork.room.ToString() 
@@ -516,7 +536,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
     private static void cleanObjects()
     {
-
+        /*
         for (int i = 0; i < 10; i++)
         {
             GameObject obj = GameObject.Find("role" + i + "(Clone)");
@@ -525,7 +545,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
                 Destroy(obj);
             }
         }
-        
+        */
     }
 
     private void gameInit()
@@ -536,7 +556,6 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         allocateRoles();
         selfRole = roleList[0];
         createObject(0, roleList.Count);
-        //createTitleName();
 
         Role[] content = roleList.ToArray();
         PhotonNetwork.RaiseEvent((byte)ProtocolCode.Host_GameStart, content, true, null);
@@ -646,6 +665,28 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         obj.transform.rotation = Quaternion.Euler(0, 0, 0);
     }
 
+    public Vector3 resetObject(GameObject obj)
+    {
+        //让速度变为0
+        obj.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
+        obj.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
+        //role.GetComponent<Rigidbody>().velocity = Vector3.zero;//光设速度为0不行的，位置不变但rotation还是会变
+        //恢复旋转
+        obj.transform.rotation = Quaternion.Euler(0, 0, 0);
+
+        //恢复位置
+        Vector3 center = diskObject.transform.position;
+        Vector3 originalRolePoint = new Vector3(0f, 2f, -2.5f);
+        //float angle = index * 90;
+        float angle = PUNConnect.getAngle(obj.name);
+        Vector3 axis = Vector3.up;
+        Vector3 point = Quaternion.AngleAxis(angle, axis) * (originalRolePoint - center);
+        Debug.Log("standup++++++++++++point:" + point + ", center:" + center + ", name:" + obj.name);
+        obj.transform.position = point;
+
+        return point;
+    }
+
     public static float getAngle(string objName)
     {
         for (int i = 0; i < roleList.Count; i++)
@@ -663,7 +704,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     }
 
 
-    public static void checkGameEnd()
+    public void checkGameEnd()
     {
         if (!isHost || gameState != GameState.GameStart)
         {
@@ -693,15 +734,17 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
             string[] strReusltReason = new string[] {gameState + "", gameResultReason };
             PhotonNetwork.RaiseEvent((byte)ProtocolCode.Host_GameEnd, strReusltReason, true, null);
 
-            gameOver();
+            StartCoroutine(gameOver());
+            //gameOver();
         }
 
     }
-
-    public static void gameOver()
+    public IEnumerator gameOver()
     {
-        cleanObjects();
+        yield return new WaitForSeconds(1.5f);
 
+        cleanObjects();
+        PhotonNetwork.DestroyPlayerObjects(selfPlayer);
 
         s_endScene.SetActive(true);
         String winner = "胜利者";
@@ -860,6 +903,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
                     }
                 }
 
+				selfRole.isDeath = false;
+
                 StartCoroutine(gameStart());
             }
         }
@@ -888,12 +933,23 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         {
 
             int[] ids = content as int[];
-            int id = ids[0];
+            int killID = ids[0];
+            Role killRole = getRoleByID(killID);
+            int deathID = ids[1];
             for (int i = 0; i < roleList.Count; i++)
             {
-                if ( selfRole != null && selfRole.id == id)
+                if (roleList[i].id == deathID)
                 {
-                    selfRole.isDeath = true;
+                    roleList[i].isDeath = true;
+                    roleList[i].beKillID = killID;
+                    Debug.Log("showLaserEffect++++++++++++++++killRole.objectName:" + killRole.objectName
+                        + ", roleList[i].objectName:" + roleList[i].objectName);
+                    showLaserEffect(killRole.objectName, roleList[i].objectName);
+                }
+
+                if (selfID == deathID)
+                {
+                    selfRole = roleList[i];
                 }
             }
         }
@@ -910,7 +966,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
             Debug.Log("Host_GameEnd++++++++++++result0:" + result[0] + ", result1:" + result[1]
                 + ", gameState:" + gameState);
             gameResultReason = result[1];
-            gameOver();
+            //gameOver();
+            StartCoroutine(gameOver());
         }
         else if(eventcode == (byte)ProtocolCode.All_StandUp) //广播重新站立状态
         {
@@ -948,6 +1005,31 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         }
     }
 
+    public void showLaserEffect(string attackObjectName, string deathObjectName)
+    {
+		GameObject attackObject = getObjectByName(attackObjectName);
+		GameObject otherObject = getObjectByName(deathObjectName);
+		if (attackObject == null || otherObject == null) {
+			return;
+		}
+        Vector3 pos1 = attackObject.transform.position;
+        pos1.y += 1f;
+        Vector3 pos2 = otherObject.transform.position;
+        pos2.y += 1f;
+
+        GameObject laser = attackObject.transform.Find("Laser").gameObject;
+        laser.SetActive(true);
+        laser.GetComponent<LineRenderer>().SetPositions(new Vector3[] { pos1, pos2 });
+
+        StartCoroutine(DelayToInvoke(delegate ()
+        {
+            if (laser != null)
+            {
+                laser.SetActive(false);
+            }
+        }, 1f));
+    }
+
     void setRolesInfo(Role[] roles)
     {
         roleList.Clear();
@@ -961,10 +1043,13 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
             }
         }
     }
-    void createTitleName()
+    private void createTitleName()
     {
+        Debug.Log("11createTitleName+++++++++++++++++++++++++");
         StartCoroutine(DelayToInvoke(delegate ()
         {
+            Debug.Log("22createTitleName+++++++++++++++++++++++++");
+
             for (int i = 0; i < roleList.Count; i++)
             {
                 GameObject obj = GameObject.Find("role" + i + "(Clone)");
@@ -974,7 +1059,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
                 obj.transform.Find("nameCanvas").transform.Find("Text").GetComponent<Text>().text = name;
                 obj.transform.Find("nameCanvas").transform.Find("Text").GetComponent<Text>().color = color;
             }
-        }, 1f));
+        }, 0.5f));
     }
     void pointSpy(Role sayRole, Role spyRole)
     {
@@ -996,9 +1081,11 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     }
 
 
-    public static void attack(string attackObjectName, string deathObjectName)
+    public void attack(string attackObjectName, string deathObjectName)
     {
-        //Debug.Log("+++++++++attackObjectName:" + attackObjectName + ", deathObjectName:" + deathObjectName);
+        Debug.Log("+++++++++attackObjectName:" + attackObjectName + ", deathObjectName:" + deathObjectName);
+        showLaserEffect(attackObjectName, deathObjectName);
+
         Role attack = getRoleByObjectName(attackObjectName);
 
         for (int i = 0; i < roleList.Count; i++)
@@ -1008,8 +1095,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
                 roleList[i].isDeath = true;
                 roleList[i].beKillID = attack.id;
                 //广播状态
-                int[] id = new int[] {roleList[i].id};
-                PhotonNetwork.RaiseEvent((byte)ProtocolCode.Host_KillOtherResult, id, true, null);
+                int[] ids = new int[] {attack.id, roleList[i].id};
+                PhotonNetwork.RaiseEvent((byte)ProtocolCode.Host_KillOtherResult, ids, true, null);
 
                 checkGameEnd();
 
@@ -1101,7 +1188,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         Debug.Log("自己加入房间OnJoinedRoom+++++++++++++++++++++++++++++name:" + PhotonNetwork.room.Name
             + ", playerCount:" + PhotonNetwork.room.PlayerCount);
         createSelfRole();
-        
+        selfPlayer = PhotonNetwork.player;
     }
 
     public void OnPhotonPlayerConnected(PhotonPlayer newPlayer)

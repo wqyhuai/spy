@@ -7,7 +7,12 @@ public class testCollider : MonoBehaviour {
     public GameObject diskObject;
     private GameObject lastCollider;
     private TimeSpan lastColliderTime;
+    PUNConnect punScript;
 
+    void Start()
+    {
+        punScript = GameObject.Find("MainCamera").GetComponent<PUNConnect>();
+    }
     /*
     //只有勾选trigger，trigger相关的函数才会回调
     private void OnTriggerEnter(Collider other)
@@ -44,7 +49,7 @@ public class testCollider : MonoBehaviour {
         }
 
         PUNConnect.gameScore--;
-        PUNConnect.checkGameEnd();
+        punScript.checkGameEnd();
 
         lastCollider = role;
     }
@@ -95,22 +100,7 @@ public class testCollider : MonoBehaviour {
                 return;
             }
 
-            //让速度变为0
-            obj.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeAll;
-            obj.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.None;
-            //role.GetComponent<Rigidbody>().velocity = Vector3.zero;//光设速度为0不行的，位置不变但rotation还是会变
-            //恢复旋转
-            obj.transform.rotation = Quaternion.Euler(0, 0, 0);
-
-            //恢复位置
-            Vector3 center = diskObject.transform.position;
-            Vector3 originalRolePoint = new Vector3(0f, 2f, -2.5f);
-            //float angle = index * 90;
-            float angle = PUNConnect.getAngle(obj.name);
-            Vector3 axis = Vector3.up;
-            Vector3 point = Quaternion.AngleAxis(angle, axis) * (originalRolePoint - center);
-            Debug.Log("standup++++++++++++point:" + point + ", center:" + center + ", name:" + obj.name);
-            obj.transform.position = point;
+            Vector3 point = punScript.resetObject(obj);
 
             string str = obj.name.Substring(4, 1);
             int index = Convert.ToInt32(str);

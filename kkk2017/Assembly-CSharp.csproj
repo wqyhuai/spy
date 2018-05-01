@@ -51,7 +51,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\GameScene.cs" />
+     <Compile Include="Assets\2D_ColorsBall\Script\Ball.cs" />
+     <Compile Include="Assets\2D_ColorsBall\Script\cEnemy.cs" />
+     <Compile Include="Assets\2D_ColorsBall\Script\ColorFall.cs" />
+     <Compile Include="Assets\2D_ColorsBall\Script\GameManager.cs" />
+     <Compile Include="Assets\2D_ColorsBall\Script\JustRotate.cs" />
+     <Compile Include="Assets\2D_ColorsBall\Script\PlayerManager.cs" />
+     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_CreateWindowShareLink.cs" />
+     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_DestroyWindow.cs" />
+     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_GraphicsManager.cs" />
+     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_NavigationInformation.cs" />
+     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_SceneNavigation.cs" />
+     <Compile Include="Assets\Mobile Game GUI Vector Pack\DEMO_Scripts\DEMO_SoundManager.cs" />
      <Compile Include="Assets\Photon Unity Networking\Demos\Demo2DJumpAndRunWithPhysics\Scripts\Demo2DJumpAndRun.cs" />
      <Compile Include="Assets\Photon Unity Networking\Demos\Demo2DJumpAndRunWithPhysics\Scripts\JumpAndRunMovement.cs" />
      <Compile Include="Assets\Photon Unity Networking\Demos\DemoBoxes\ColorPerPlayer.cs" />
@@ -196,10 +207,12 @@
      <Compile Include="Assets\PhotonChatApi\ChatUserStatus.cs" />
      <Compile Include="Assets\PhotonChatApi\IChatClientListener.cs" />
      <Compile Include="Assets\wodi\GameClient.cs" />
+     <Compile Include="Assets\wodi\GameScene.cs" />
      <Compile Include="Assets\wodi\PlaneClick.cs" />
      <Compile Include="Assets\wodi\PUNConnect.cs" />
      <Compile Include="Assets\wodi\RoleScript.cs" />
      <Compile Include="Assets\wodi\rotate.cs" />
+     <Compile Include="Assets\wodi\ScreenRatio.cs" />
      <Compile Include="Assets\wodi\testCollider.cs" />
      <None Include="Assets\Photon Unity Networking\Demos\MarcoPolo-Tutorial\marcopolo-readme.txt" />
      <None Include="Assets\Photon Unity Networking\link.xml" />
@@ -298,17 +311,14 @@
  <Reference Include="UnityEditor.OSXStandalone.Extensions">
  <HintPath>D:/software/unity2017/Editor/Data/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
  </Reference>
- <Reference Include="SyntaxTree.VisualStudio.Unity.Bridge">
- <HintPath>C:/Program Files (x86)/Microsoft Visual Studio Tools for Unity/15.0/Editor/SyntaxTree.VisualStudio.Unity.Bridge.dll</HintPath>
- </Reference>
  <Reference Include="Newtonsoft.Json">
- <HintPath>E:/u3d/kkk2017/Assets/Photon Unity Networking/Editor/PhotonNetwork/Newtonsoft.Json.dll</HintPath>
+ <HintPath>E:/u3d/git/spy/kkk2017/Assets/Photon Unity Networking/Editor/PhotonNetwork/Newtonsoft.Json.dll</HintPath>
  </Reference>
  <Reference Include="Photon3Unity3D">
- <HintPath>E:/u3d/kkk2017/Assets/Plugins/Photon3Unity3D.dll</HintPath>
+ <HintPath>E:/u3d/git/spy/kkk2017/Assets/Plugins/Photon3Unity3D.dll</HintPath>
  </Reference>
  <Reference Include="websocket-sharp">
- <HintPath>E:/u3d/kkk2017/Assets/Plugins/WebSocket/websocket-sharp.dll</HintPath>
+ <HintPath>E:/u3d/git/spy/kkk2017/Assets/Plugins/WebSocket/websocket-sharp.dll</HintPath>
  </Reference>
  <Reference Include="UnityEngine.Advertisements">
  <HintPath>C:/Users/Administrator/AppData/LocalLow/Unity/cache/packages/packages.unity.com/com.unity.ads@2.0.3/UnityEngine.Advertisements.dll</HintPath>

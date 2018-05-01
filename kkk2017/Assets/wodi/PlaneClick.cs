@@ -7,12 +7,11 @@ using UnityEngine.UI;
 public class PlaneClick : MonoBehaviour {
 
     public Camera mainCamera;
-
-    
+    PUNConnect punScript;
 
     // Use this for initialization
     void Start () {
-		
+        punScript = GameObject.Find("MainCamera").GetComponent<PUNConnect>();
 	}
 	
 	// Update is called once per frame
@@ -67,7 +66,24 @@ public class PlaneClick : MonoBehaviour {
             Debug.LogWarning("jump++++++++++++++++ob is not active");
             return;
         }
-        Debug.Log("55++++++++++++++++++jump");
+
+        //已经在起跳状态，不再跳
+        if (ob.transform.position.y >  1.1f)
+        {
+            return;
+        }
+
+        //跌倒状态，需要站立起来
+        Quaternion rotation = ob.transform.rotation;
+        if (rotation.x < -0.2 || rotation.x > 0.2
+            || rotation.y < -0.2 || rotation.y > 0.2
+            || rotation.z < -0.2 || rotation.z > 0.2)
+        {
+            punScript.resetObject(ob);
+            return;
+        }
+
+        //Debug.Log("55++++++++++++++++++jump");
         Rigidbody rb = ob.GetComponent<Rigidbody>();
         rb.AddForce(0, 7, 0, ForceMode.Impulse);
     }
@@ -84,7 +100,7 @@ public class PlaneClick : MonoBehaviour {
             {
                 if (r.id == PUNConnect.selfRole.id)
                 {
-                    showTips("不能自杀", 1f);
+                    punScript.showTips("不能自杀", 1f);
                     return null;
                 }
                 else
@@ -111,14 +127,30 @@ public class PlaneClick : MonoBehaviour {
             
             if (PUNConnect.selfRole == null || PUNConnect.selfRole.isDeath)
             {
-                showTips("你已经挂了，不能再杀人", 1f);
+				if (PUNConnect.selfRole == null) {
+					Debug.Log ("++++++++++++++++++++++++selfRole == null");
+				}
+				Debug.Log ("++++++++++++++++++++++++PUNConnect.selfRole.isDeath:" + PUNConnect.selfRole.isDeath);
+
+                punScript.showTips("你已经挂了，不能再杀人", 1f);
                 return;
             }
             
             if (PUNConnect.selfRole.isSpy)
             {
                 Debug.Log("+++++++++++++++++你是卧底不能杀人");
-                showTips("你是卧底不能杀人", 1f);
+                punScript.showTips("你是卧底不能杀人", 1f);
+                //return;
+            }
+
+            GameObject selfObject = GameObject.Find(PUNConnect.selfRole.objectName);
+			Quaternion rotation = selfObject.transform.rotation;
+			if(rotation.x < -0.1 || rotation.x > 0.1
+				|| rotation.y < -0.1 || rotation.y > 0.1
+				|| rotation.z < -0.1 || rotation.z > 0.1)
+            {
+                punScript.showTips("只有站立状态才能杀人", 1f);
+				Debug.Log ("++++++++++++++rotation:" + selfObject.transform.rotation);
                 return;
             }
 
@@ -126,11 +158,32 @@ public class PlaneClick : MonoBehaviour {
             Debug.Log("++++++hit point:" + hit.point + ", self obj name:" + otherObject.name
                 + ", PUNConnect.selfRole.objectName:" + PUNConnect.selfRole.objectName);
 
-            StartCoroutine(attackEffect(otherObject));
+            //特效不再使用圆柱体，而是使用激光
+            if (PUNConnect.isHost) //房主则直接做杀人的逻辑判断
+            {
+                punScript.attack(selfObject.name, otherObject.name);
+            }
+            else //房客则先把消息发给房主
+            {
+                string[] content = new string[] { PUNConnect.selfRole.objectName, otherObject.name };
+                //Role需要序列化才发出去
+                PhotonNetwork.RaiseEvent((byte)PUNConnect.ProtocolCode.Guest_KillOtherRequest,
+                    content, true, null);
+            }
+
+            StartCoroutine(DelayToInvoke(delegate ()
+            {
+                otherObject.SetActive(false);
+            }, 0.2f));
+            
+            //使用圆柱体特效
+            //StartCoroutine(attackEffect(otherObject));
         }
 
     }
 
+
+    /*
     public IEnumerator attackEffect(GameObject otherObject)
     {
         GameObject selfObject = GameObject.Find(PUNConnect.selfRole.objectName);
@@ -200,7 +253,7 @@ public class PlaneClick : MonoBehaviour {
         //Debug.Log("++++++++++++++++after coroutine");
         if (PUNConnect.isHost)
         {
-            PUNConnect.attack(PUNConnect.selfRole.objectName, otherObject.name);
+            punScript.attack(PUNConnect.selfRole.objectName, otherObject.name);
         }
         else
         {
@@ -212,33 +265,11 @@ public class PlaneClick : MonoBehaviour {
                 content, reliable, null);
         }
     }
-
+    */
     private IEnumerator DelayToInvoke(Action action, float delaySecondes)
     {
         yield return new WaitForSeconds(delaySecondes);
         action();
     }
-    private void showTips(string tips, float time)
-    {
-        GameObject text = GameObject.Find("tipsCanvas/Text");
-        if (text == null)
-        {
-            Debug.LogWarning("+++++++++++++++++++tipsCanvas is null");
-            return;
-        }
-        text.GetComponent<Text>().text = tips;
-        Vector3 scale = text.transform.localScale;
-        // Vector3 position = text.transform.position;
-        //position.x = 0;
-        //text.transform.position = position;
-        text.transform.localScale = new Vector3(1, 1, 1);
-
-        StartCoroutine(DelayToInvoke(delegate ()
-        {
-            text.GetComponent<Text>().text = "初始化";
-            //position.x = 10000;
-            //text.transform.position = position;
-            text.transform.localScale = new Vector3(0, 0, 0);
-        }, time));
-    }
+    
 }

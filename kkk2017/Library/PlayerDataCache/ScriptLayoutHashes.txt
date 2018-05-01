@@ -21,6 +21,7 @@ df374c01140c2d578bf70cbd60073d1d UnityEngine.Timeline.dll:UnityEngine.Timeline.T
 93e7550236e416336300c88eaefd85fa Assembly-CSharp.dll:.ColorFall
 9650139907be6d63bf3c3eaa8900f13f Assembly-CSharp.dll:.ThirdPersonController
 b027659a510ae8d01d6d5f31baf9827a Assembly-CSharp.dll:.PhotonStatsGui
+05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ScreenRatio
 b646916c78b48f3208cda1a75aff4d8f Assembly-CSharp.dll:.ChatGui
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.DEMO_DestroyWindow
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ColorPerPlayerApply
@@ -403,4 +404,3 @@ d2a2bd333db22f480a8589e167314ecc Vuforia.UnityExtensions.dll:Vuforia.UserDefined
 05524b8f659e7bfe5756d1335fec24ba Vuforia.UnityExtensions.dll:Vuforia.WireframeTrackableEventHandler
 15bea26698002c6c4a3087131232ce5c Vuforia.UnityExtensions.dll:Vuforia.WordBehaviour
 54a26a95db9c623b6eb6fc01ae3ef891 Assembly-CSharp.dll:.CubeExtra
-05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.ScreenRatio
