@@ -39,6 +39,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     public GameObject endScene;
     public GUIStyle customSelfStyle;
     public GUIStyle customStyle;
+    public GUIStyle customIdentifyStyle;
+    public GUIStyle customCDStyle;
 
     public const int GAME_SCORE = 20;
     public static int gameScore = 0;
@@ -137,7 +139,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         string strIdentify = "身份";
         if (selfRole != null)
         {
-            strIdentify = selfRole.isSpy ? "卧底" : "平民";
+            strIdentify = selfRole.isSpy ? "你是卧底" : "你是平民";
         }
 
         if (gameState == GameState.JoinedRoom)
@@ -145,13 +147,35 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
             GUI.Label(new Rect(0 - _offset.x + 20, diffY - _offset.y, 50, 20), PhotonNetwork.room.Name);
         }
         GUI.Label(new Rect(0 - _offset.x + 70, diffY - _offset.y, 50, 20), strHost);
+        GUI.Label(new Rect(0 - _offset.x + 210, diffY - _offset.y, 50, 20), PhotonNetwork.connectionStateDetailed.ToString());
+        if (gameScore > 0 && gameScore < 5)
+        //if(true)
+        {
+            GUI.Label(new Rect(NativeResolution.x - 120 + _offset.x, NativeResolution.y/2 - 50, 50, 20), "积分:" + gameScore, customCDStyle);
+        }
+        else
+        {
+            GUI.Label(new Rect(0 - _offset.x + 280, diffY - _offset.y, 50, 20), "积分:" + gameScore);
+        }
+
+        if (timeLeft > 0 && timeLeft < 5)
+        //if(true)
+        {
+            GUI.Label(new Rect(NativeResolution.x - 120 + _offset.x, NativeResolution.y/2, 100, 20), 
+                "时间:" + timeLeft, customCDStyle);
+        }
+        else
+        {
+            GUI.Label(new Rect(0 - _offset.x + 350, diffY - _offset.y, 100, 20), 
+                "时间:" + timeLeft);
+        }
+            
+
         if (gameState == GameState.GameStart || gameState == GameState.SpyWin || gameState == GameState.SpyLose)
         {
-            GUI.Label(new Rect(0 - _offset.x + 140, diffY - _offset.y, 50, 20), strIdentify);
+            GUI.Label(new Rect(NativeResolution.x/2 - 40, NativeResolution.y - 40 + _offset.y, 50, 20), 
+                strIdentify, customIdentifyStyle);
         }
-        GUI.Label(new Rect(0 - _offset.x + 210, diffY - _offset.y, 50, 20), PhotonNetwork.connectionStateDetailed.ToString());
-        GUI.Label(new Rect(0 - _offset.x + 280, diffY - _offset.y, 50, 20), "score:" + gameScore);
-        GUI.Label(new Rect(0 - _offset.x + 350, diffY - _offset.y, 100, 20), "剩余时间：" + timeLeft);
 
 
         if (gameState == GameState.SpyWin || gameState == GameState.SpyLose)
@@ -767,7 +791,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         for (int i = 0; i < roleList.Count; i++)
         {
             Role r = roleList[i];
-            r.print();
+            //r.print();
             string strIdentify = r.isSpy ? "卧底" : "平民";
             string strBeKill = "";
             if (r.beKillID != -1)
@@ -858,7 +882,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
     void OnEvent(byte eventcode, object content, int senderid)
     {
-        Debug.Log("kkk2017++++++++++eventcode:" + eventcode + ", content:" + content + ", senderid:" + senderid);
+        //Debug.Log("kkk2017++++++++++eventcode:" + eventcode + ", content:" + content + ", senderid:" + senderid);
         if (eventcode == (byte)ProtocolCode.Host_PlayerJoined)
         {
             roleList.Clear();
@@ -1052,7 +1076,8 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
 
             for (int i = 0; i < roleList.Count; i++)
             {
-                GameObject obj = GameObject.Find("role" + i + "(Clone)");
+                //GameObject obj = GameObject.Find("role" + i + "(Clone)");
+                GameObject obj = GameObject.Find(roleList[i].objectName);
                 obj.transform.Find("nameCanvas").gameObject.SetActive(true);
                 string name = (roleList[i].id == selfRole.id)? "自己" : roleList[i].name;
                 Color color = (roleList[i].id == selfRole.id) ? new Color(255, 0, 0, 255) : new Color(255, 255, 0, 255);

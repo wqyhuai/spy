@@ -37,7 +37,7 @@ public class testCollider : MonoBehaviour {
             return;
         }
         GameObject role = collision.gameObject;
-        Debug.Log("+++++++++++++++++++++++OnCollisionEnter, 开始碰到了, name:" + role.name);
+        //Debug.Log("+++++++++++++++++++++++OnCollisionEnter, 开始碰到了, name:" + role.name);
         TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
         TimeSpan diff = ts - lastColliderTime;
         lastColliderTime = ts;

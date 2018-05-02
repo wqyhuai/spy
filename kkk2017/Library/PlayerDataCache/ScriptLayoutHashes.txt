@@ -1,4 +1,4 @@
-WindowsStandalone
+iOS
 SceneListBegin?
 Assets/hello.unity
 SceneListEnd?
@@ -211,7 +211,7 @@ c0ad1fb5d400aa83cb257e5f6c3714cf Assembly-CSharp.dll:.OnClickDestroy
 30c6237931168f8b4c2f10a656a47aa8 Assembly-CSharp.dll:.PickupItem
 b9efe2a0d1c9ba7bc46e66a07a897115 Assembly-CSharp.dll:.ServerSettings
 e3db0de06ede87e84b88d4a2079f2b57 Assembly-CSharp.dll:ExitGames.UtilityScripts.TextButtonTransition
-ca31c7d7c8c83323b0ccb0760e07b24b Assembly-CSharp.dll:.PUNConnect
+10bcbbb9c8435d5edb8a83073148a229 Assembly-CSharp.dll:.PUNConnect
 fc1e0f4d8439d9928083474691511a13 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkAnimator
 05524b8f659e7bfe5756d1335fec24ba UnityEngine.Networking.dll:UnityEngine.Networking.NetworkBehaviour
 60b2bb652410a5867a5ab9a01cd38461 UnityEngine.Networking.dll:UnityEngine.Networking.NetworkDiscovery

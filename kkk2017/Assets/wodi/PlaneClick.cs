@@ -96,7 +96,9 @@ public class PlaneClick : MonoBehaviour {
             
 
             GameObject obj = GameObject.Find(r.objectName);
-            if (obj != null && ts == obj.transform)
+            //扩大点击区域，名字也可点
+            Transform cubeTransform = obj.transform.Find("Cube");
+            if (obj != null && (ts == obj.transform || ts == cubeTransform))
             {
                 if (r.id == PUNConnect.selfRole.id)
                 {
@@ -140,7 +142,7 @@ public class PlaneClick : MonoBehaviour {
             {
                 Debug.Log("+++++++++++++++++你是卧底不能杀人");
                 punScript.showTips("你是卧底不能杀人", 1f);
-                //return;
+                return;
             }
 
             GameObject selfObject = GameObject.Find(PUNConnect.selfRole.objectName);
