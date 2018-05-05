@@ -40,12 +40,13 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     public GUIStyle customSelfStyle;
     public GUIStyle customStyle;
     public GUIStyle customIdentifyStyle;
+    public GUIStyle customScoreStyle;
     public GUIStyle customCDStyle;
 
     public const int GAME_SCORE = 20;
     public static int gameScore = 0;
     public const int TOTAL_GAME_TIME = 60;
-    public static int timeLeft = 0; //剩余时间
+    private static int timeLeft = 0; //剩余时间
 
     public static GameObject s_endScene;
 
@@ -124,7 +125,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
     {
         if (gameState == GameState.GameStart && isHost)
         {
-            diskObject.transform.Rotate(Vector3.up * Time.deltaTime * 50, Space.World);
+            diskObject.transform.Rotate(Vector3.up * Time.deltaTime * 80, Space.World);
         }
     }
     private void OnGUI()
@@ -151,7 +152,7 @@ public class PUNConnect : MonoBehaviour, IPunCallbacks, IPunObservable
         if (gameScore > 0 && gameScore < 5)
         //if(true)
         {
-            GUI.Label(new Rect(NativeResolution.x - 120 + _offset.x, NativeResolution.y/2 - 50, 50, 20), "积分:" + gameScore, customCDStyle);
+            GUI.Label(new Rect(NativeResolution.x - 120 + _offset.x, NativeResolution.y/2 - 50, 50, 20), "积分:" + gameScore, customScoreStyle);
         }
         else
         {
