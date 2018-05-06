@@ -36,22 +36,22 @@ public class testCollider : MonoBehaviour {
         {
             return;
         }
-        GameObject role = collision.gameObject;
+        GameObject obj = collision.gameObject;
         //Debug.Log("+++++++++++++++++++++++OnCollisionEnter, 开始碰到了, name:" + role.name);
         TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
         TimeSpan diff = ts - lastColliderTime;
         lastColliderTime = ts;
        // Debug.Log("++++++++++++++++++time diff:" + diff.TotalMilliseconds);
         //500毫秒内连续碰撞同一个物体认为无效
-        if (lastCollider != null && role.name == lastCollider.name && diff.TotalMilliseconds < 500)
+        if (lastCollider != null && obj.name == lastCollider.name && diff.TotalMilliseconds < 500)
         {
             return;
         }
 
-        PUNConnect.gameScore--;
+        punScript.selfFallDown(obj.name);
         punScript.checkGameEnd();
 
-        lastCollider = role;
+        lastCollider = obj;
     }
 
     public IEnumerator DelayToInvoke(Action action, float delaySecondes)

@@ -67,6 +67,11 @@ public class PlaneClick : MonoBehaviour {
             return;
         }
 
+        if (!punScript.canJump())
+        {
+            return;
+        }
+
         //已经在起跳状态，不再跳
         if (ob.transform.position.y >  1.1f)
         {
@@ -85,7 +90,7 @@ public class PlaneClick : MonoBehaviour {
 
         //Debug.Log("55++++++++++++++++++jump");
         Rigidbody rb = ob.GetComponent<Rigidbody>();
-        rb.AddForce(0, 7, 0, ForceMode.Impulse);
+        rb.AddForce(0, 8, 0, ForceMode.Impulse);
     }
 
     GameObject getHitObject(Transform ts)
@@ -172,12 +177,12 @@ public class PlaneClick : MonoBehaviour {
                 PhotonNetwork.RaiseEvent((byte)PUNConnect.ProtocolCode.Guest_KillOtherRequest,
                     content, true, null);
             }
-
+            /*
             StartCoroutine(DelayToInvoke(delegate ()
             {
                 otherObject.SetActive(false);
             }, 0.2f));
-            
+            */
             //使用圆柱体特效
             //StartCoroutine(attackEffect(otherObject));
         }
